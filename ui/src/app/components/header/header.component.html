@@ -1,0 +1,35 @@
+<header class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-4">
+      <!-- Logo -->
+      <button (click)="goHome()" class="flex items-center gap-2 shrink-0 group">
+        <svg class="w-8 h-8 text-[#FF385C]" viewBox="0 0 32 32" fill="currentColor">
+          <path d="M16 1C10.477 1 6 5.477 6 11c0 7.5 10 20 10 20s10-12.5 10-20c0-5.523-4.477-10-10-10zm0 13.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/>
+        </svg>
+        <span class="text-[#FF385C] font-bold text-xl tracking-tight hidden sm:block">StayFinder</span>
+      </button>
+
+      <!-- Search Bar -->
+      <div class="flex-1 max-w-xl">
+        <app-search-bar (search)="onSearch($event)" (clear)="onClear()"></app-search-bar>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button class="hidden md:flex items-center gap-1.5 text-sm font-semibold text-[#222] hover:bg-gray-100 px-3 py-2 rounded-full transition-colors whitespace-nowrap">
+          Add your home
+        </button>
+        <div class="flex items-center gap-1 border border-gray-200 rounded-full px-2 py-1 cursor-pointer hover:shadow-md transition-shadow">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7"/>
+          </svg>
+          <div class="w-7 h-7 rounded-full bg-[#222] flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12a5 5 0 110-10 5 5 0 010 10zm-7 9a7 7 0 1114 0H5z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

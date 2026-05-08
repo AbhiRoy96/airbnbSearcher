@@ -75,8 +75,6 @@ public class ListingServiceImpl implements IListingService {
         return ListingAutoResponseDTO.builder()
                 .id(doc.getId())
                 .name(doc.getName())
-                .description(doc.getDescription())
-                .pictureUrl(doc.getPictureUrl())
                 .build();
     }
 
