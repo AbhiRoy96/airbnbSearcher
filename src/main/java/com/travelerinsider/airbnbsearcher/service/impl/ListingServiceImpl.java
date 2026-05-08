@@ -58,7 +58,10 @@ public class ListingServiceImpl implements IListingService {
     @Cacheable(value = "listingSearch", key = "#query")
     public List<ListingResponseDTO> searchListings(String query) {
         log.debug("Searching listings with query: {} from Elasticsearch", query);
-        return listingElasticRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query)
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        return listingElasticRepository.findByQuery(query)
                 .stream()
                 .map(this::mapDocumentToDTO)
                 .collect(Collectors.toList());
@@ -68,6 +71,9 @@ public class ListingServiceImpl implements IListingService {
     @Cacheable(value = "listingAutocomplete", key = "#prefix")
     public List<ListingAutoResponseDTO> autocomplete(String prefix) {
         log.debug("Autocomplete listings with prefix: {}", prefix);
+        if (prefix == null || prefix.isBlank()) {
+            return List.of();
+        }
         return listingElasticRepository.autocomplete(prefix)
                 .stream()
                 .map(this::mapDocumentToAutoDTO)

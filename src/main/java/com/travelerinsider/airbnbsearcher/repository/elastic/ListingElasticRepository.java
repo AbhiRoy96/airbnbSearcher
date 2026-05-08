@@ -14,12 +14,12 @@ public interface ListingElasticRepository extends ElasticsearchRepository<Listin
             {
               "multi_match": {
                 "query": "?0",
-                "fields": ["name", "description"]
+                "fields": ["name", "description"],
+                "operator": "and"
               }
             }
             """)
-    List<ListingDocument> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String query, String ignored);
+    List<ListingDocument> findByQuery(String query);
 
     /**
      * Autocomplete using the search_as_you_type sub-field on name.
@@ -34,8 +34,7 @@ public interface ListingElasticRepository extends ElasticsearchRepository<Listin
                 "fields": [
                   "name.autocomplete",
                   "name.autocomplete._2gram",
-                  "name.autocomplete._3gram",
-                  "name.autocomplete._index_prefix"
+                  "name.autocomplete._3gram"
                 ]
               }
             }
