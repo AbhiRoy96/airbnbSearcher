@@ -18,6 +18,15 @@ spring:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
     socket-timeout: 30s
     connection-timeout: 30s
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30m
+      cache-null-values: false
 
 management:
   otlp:

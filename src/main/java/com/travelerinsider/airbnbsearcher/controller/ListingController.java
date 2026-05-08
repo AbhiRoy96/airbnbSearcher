@@ -1,5 +1,6 @@
 package com.travelerinsider.airbnbsearcher.controller;
 
+import com.travelerinsider.airbnbsearcher.domain.dto.ListingAutoResponseDTO;
 import com.travelerinsider.airbnbsearcher.domain.dto.ListingResponseDTO;
 import com.travelerinsider.airbnbsearcher.domain.interfaces.IListingService;
 import com.travelerinsider.airbnbsearcher.service.elastic.ListingSyncService;
@@ -42,7 +43,7 @@ public class ListingController {
     }
 
     @GetMapping("/autocomplete")
-    public ResponseEntity<List<ListingResponseDTO>> autocomplete(@RequestParam String q) {
+    public ResponseEntity<List<ListingAutoResponseDTO>> autocomplete(@RequestParam String q) {
         log.info("Autocomplete listings with prefix: {}", q);
         return ResponseEntity.ok(listingService.autocomplete(q));
     }

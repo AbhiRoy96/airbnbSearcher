@@ -1,5 +1,6 @@
 package com.travelerinsider.airbnbsearcher.domain.interfaces;
 
+import com.travelerinsider.airbnbsearcher.domain.dto.ListingAutoResponseDTO;
 import com.travelerinsider.airbnbsearcher.domain.dto.ListingResponseDTO;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -9,5 +10,5 @@ public interface IListingService {
     Page<ListingResponseDTO> getAllListings(Pageable pageable);
     ListingResponseDTO getListingById(Long id);
     List<ListingResponseDTO> searchListings(String query);
-    List<ListingResponseDTO> autocomplete(String prefix);
+    List<ListingAutoResponseDTO> autocomplete(String prefix);
 }
