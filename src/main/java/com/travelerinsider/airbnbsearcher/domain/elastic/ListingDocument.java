@@ -8,12 +8,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Document(indexName = "listings", createIndex = false)
+@Document(indexName = "listings", createIndex = true)
 @Setting(shards = 1, replicas = 0)
 @Data
 @Builder
@@ -36,7 +38,12 @@ public class ListingDocument {
     @Field(type = FieldType.Text)
     private String source;
 
-    @Field(type = FieldType.Text)
+    @MultiField(
+        mainField = @Field(type = FieldType.Text),
+        otherFields = {
+            @InnerField(suffix = "autocomplete", type = FieldType.Search_As_You_Type)
+        }
+    )
     private String name;
 
     @Field(type = FieldType.Text)

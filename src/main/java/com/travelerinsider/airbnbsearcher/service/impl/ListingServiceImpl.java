@@ -56,6 +56,15 @@ public class ListingServiceImpl implements IListingService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ListingResponseDTO> autocomplete(String prefix) {
+        log.debug("Autocomplete listings with prefix: {}", prefix);
+        return listingElasticRepository.autocomplete(prefix)
+                .stream()
+                .map(this::mapDocumentToDTO)
+                .collect(Collectors.toList());
+    }
+
     private ListingResponseDTO mapDocumentToDTO(ListingDocument doc) {
         return ListingResponseDTO.builder()
                 .id(doc.getId())

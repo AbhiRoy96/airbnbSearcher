@@ -9,4 +9,5 @@ public interface IListingService {
     Page<ListingResponseDTO> getAllListings(Pageable pageable);
     ListingResponseDTO getListingById(Long id);
     List<ListingResponseDTO> searchListings(String query);
+    List<ListingResponseDTO> autocomplete(String prefix);
 }

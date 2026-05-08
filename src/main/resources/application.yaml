@@ -9,7 +9,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -17,3 +18,12 @@ spring:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
     socket-timeout: 30s
     connection-timeout: 30s
+
+management:
+  otlp:
+    metrics:
+      export:
+        # Disabled by default — set to true and configure the endpoint
+        # when an OpenTelemetry collector is available in your environment.
+        enabled: ${OTLP_METRICS_ENABLED:false}
+        url: ${OTLP_ENDPOINT:http://localhost:4318/v1/metrics}

@@ -41,6 +41,12 @@ public class ListingController {
         return ResponseEntity.ok(listingService.searchListings(query));
     }
 
+    @GetMapping("/autocomplete")
+    public ResponseEntity<List<ListingResponseDTO>> autocomplete(@RequestParam String q) {
+        log.info("Autocomplete listings with prefix: {}", q);
+        return ResponseEntity.ok(listingService.autocomplete(q));
+    }
+
     @PostMapping("/sync")
     public ResponseEntity<String> syncListings() {
         log.info("Triggering full re-index of listings to Elasticsearch");
