@@ -25,14 +25,14 @@
   <div *ngIf="searchQuery" class="mb-6 flex items-center justify-between">
     <div>
       <h2 class="text-2xl font-bold text-gray-900">Results for "{{ searchQuery }}"</h2>
-      <p class="text-sm text-gray-500 mt-1">{{ totalElements }} listings found</p>
+      <p class="text-sm text-gray-500 mt-1">{{ totalElements | number }} listings found</p>
     </div>
   </div>
 
   <!-- Default header when no search -->
   <div *ngIf="!searchQuery && !isLoading" class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Explore places to stay</h1>
-    <p class="text-gray-500 mt-1">{{ totalElements.toLocaleString() }} listings available</p>
+    <p class="text-gray-500 mt-1">{{ totalElements | number }} listings available</p>
   </div>
 
   <!-- Error state -->
@@ -79,8 +79,8 @@
     <p class="text-gray-500 text-sm">Try searching with different keywords</p>
   </div>
 
-  <!-- Pagination (only when not searching) -->
-  <div *ngIf="!searchQuery && !isLoading && totalPages > 1" class="mt-10 flex items-center justify-center gap-2">
+  <!-- Pagination (always available if results exist and not searching) -->
+  <div *ngIf="!searchQuery && !isLoading && totalElements > 0 && totalPages > 1" class="mt-10 flex items-center justify-center gap-2">
     <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0"
       class="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

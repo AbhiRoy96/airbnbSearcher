@@ -9,10 +9,12 @@ import com.travelerinsider.airbnbsearcher.domain.interfaces.IListingService;
 import com.travelerinsider.airbnbsearcher.domain.elastic.ListingDocument;
 import com.travelerinsider.airbnbsearcher.repository.ListingRepository;
 import com.travelerinsider.airbnbsearcher.repository.elastic.ListingElasticRepository;
+import com.travelerinsider.airbnbsearcher.domain.dto.RestPageImpl;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -33,10 +35,11 @@ public class ListingServiceImpl implements IListingService {
 
     @Override
     @Cacheable(value = "listings", key = "#pageable")
-    public Page<ListingResponseDTO> getAllListings(Pageable pageable) {
+    public RestPageImpl<ListingResponseDTO> getAllListings(Pageable pageable) {
         log.debug("Finding all listings from repository");
-        return listingRepository.findAll(pageable)
+        Page<ListingResponseDTO> page = listingRepository.findAll(pageable)
                 .map(this::mapToDTO);
+        return new RestPageImpl<>(page.getContent(), page.getPageable(), page.getTotalElements());
     }
 
     @Override
@@ -73,14 +76,14 @@ public class ListingServiceImpl implements IListingService {
 
     private ListingAutoResponseDTO mapDocumentToAutoDTO(ListingDocument doc) {
         return ListingAutoResponseDTO.builder()
-                .id(doc.getId())
+                .id(String.valueOf(doc.getId()))
                 .name(doc.getName())
                 .build();
     }
 
     private ListingResponseDTO mapDocumentToDTO(ListingDocument doc) {
         return ListingResponseDTO.builder()
-                .id(doc.getId())
+                .id(String.valueOf(doc.getId()))
                 .name(doc.getName())
                 .description(doc.getDescription())
                 .pictureUrl(doc.getPictureUrl())
@@ -104,7 +107,7 @@ public class ListingServiceImpl implements IListingService {
 
     private ListingResponseDTO mapToDTO(Listing listing) {
         return ListingResponseDTO.builder()
-                .id(listing.getId())
+                .id(String.valueOf(listing.getId()))
                 .name(listing.getName())
                 .description(listing.getDescription())
                 .pictureUrl(listing.getPictureUrl())

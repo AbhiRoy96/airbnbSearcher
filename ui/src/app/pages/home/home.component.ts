@@ -33,9 +33,9 @@ export class HomeComponent implements OnInit {
     this.listingService.getAllListings(page, 12).subscribe({
       next: (response) => {
         this.listings = response.content;
-        this.totalPages = response.totalPages;
-        this.totalElements = response.totalElements;
-        this.currentPage = response.number;
+        this.totalPages = response.totalPages ?? response.page?.totalPages ?? 0;
+        this.totalElements = response.totalElements ?? response.page?.totalElements ?? 0;
+        this.currentPage = response.number ?? response.page?.number ?? 0;
         this.isLoading = false;
       },
       error: () => {

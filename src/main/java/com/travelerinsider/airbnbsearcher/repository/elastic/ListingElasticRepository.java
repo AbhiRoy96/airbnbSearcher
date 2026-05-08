@@ -10,8 +10,16 @@ import java.util.List;
 @Repository
 public interface ListingElasticRepository extends ElasticsearchRepository<ListingDocument, Long> {
 
+    @Query("""
+            {
+              "multi_match": {
+                "query": "?0",
+                "fields": ["name", "description"]
+              }
+            }
+            """)
     List<ListingDocument> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description);
+            String query, String ignored);
 
     /**
      * Autocomplete using the search_as_you_type sub-field on name.

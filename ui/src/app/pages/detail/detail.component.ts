@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ListingService, ListingResponseDTO } from '../../services/listing.service';
+import { ListingService } from '../../services/listing.service';
+import { Listing } from '../../models/listing.model';
 
 @Component({
   selector: 'app-detail',
@@ -14,7 +15,7 @@ export class DetailComponent implements OnInit {
   private router = inject(Router);
   private listingService = inject(ListingService);
 
-  listing = signal<ListingResponseDTO | null>(null);
+  listing = signal<Listing | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -22,9 +23,9 @@ export class DetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     console.log('Fetching listing with ID:', id);
     this.listingService.getListingById(id!).subscribe({
-      next: (data) => { 
+      next: (data) => {
         this.listing.set(data);
-        console.log('Fetched listing:', data); 
+        console.log('Fetched listing:', data);
         this.loading.set(false); },
       error: () => { this.error.set('Listing not found.'); this.loading.set(false); }
     });

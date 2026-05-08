@@ -7,9 +7,9 @@ import { Listing, AutocompleteSuggestion, PageResponse } from '../models/listing
   providedIn: 'root'
 })
 export class ListingService {
-  private baseUrl = 'http://localhost:8080/api/listings';
+  private readonly baseUrl = 'http://localhost:8080/api/listings';
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getAllListings(page: number = 0, size: number = 12): Observable<PageResponse<Listing>> {
     const params = new HttpParams().set('page', page).set('size', size);
