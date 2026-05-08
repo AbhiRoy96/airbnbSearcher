@@ -1,0 +1,181 @@
+<!-- Back navigation -->
+<header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-4 py-4">
+      <a routerLink="/" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
+        <svg class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span class="text-sm font-medium">Back to listings</span>
+      </a>
+      <div class="flex items-center gap-2 ml-auto">
+        <svg class="w-6 h-6 text-rose-500" viewBox="0 0 32 32" fill="currentColor">
+          <path d="M16 1C7.716 1 1 7.716 1 16s6.716 15 15 15 15-6.716 15-15S24.284 1 16 1zm0 5.5c2.485 0 4.5 2.015 4.5 4.5s-2.015 4.5-4.5 4.5-4.5-2.015-4.5-4.5 2.015-4.5 4.5-4.5zm0 21c-3.75 0-7.07-1.894-9.1-4.8.046-3.016 6.067-4.675 9.1-4.675s9.054 1.659 9.1 4.675C23.07 25.606 19.75 27.5 16 27.5z"/>
+        </svg>
+        <span class="text-lg font-bold text-gray-900 tracking-tight">stayfindr</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="animate-pulse space-y-6">
+    <div class="h-8 bg-gray-200 rounded w-2/3"></div>
+    <div class="aspect-[16/9] bg-gray-200 rounded-2xl"></div>
+    <div class="grid grid-cols-3 gap-4">
+      <div class="h-20 bg-gray-200 rounded-xl"></div>
+      <div class="h-20 bg-gray-200 rounded-xl"></div>
+      <div class="h-20 bg-gray-200 rounded-xl"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="text-center py-24">
+    <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <p class="text-gray-700 font-semibold">{{ error }}</p>
+    <a routerLink="/" class="mt-4 inline-block text-rose-500 hover:underline text-sm">Go back home</a>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="listing && !isLoading">
+    <!-- Title row -->
+    <div class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{{ listing.name }}</h1>
+        <div class="flex items-center gap-3 mt-2 flex-wrap">
+          <span *ngIf="listing.reviewScoresRating" class="flex items-center gap-1 text-sm font-medium text-gray-700">
+            <svg class="w-4 h-4 text-rose-500 fill-current" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+            {{ listing.reviewScoresRating | number:'1.1-1' }}
+            <span class="text-gray-400 font-normal">· {{ listing.numberOfReviews }} reviews</span>
+          </span>
+          <span class="text-gray-400">·</span>
+          <span class="text-sm text-gray-600">{{ listing.neighbourhood }}</span>
+          <span *ngIf="listing.instantBookable"
+            class="inline-flex items-center gap-1 bg-rose-50 text-rose-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+            ⚡ Instant Book
+          </span>
+        </div>
+      </div>
+      <div class="flex-shrink-0 text-right">
+        <div class="text-2xl font-bold text-gray-900">{{ listing.price }}</div>
+        <div class="text-sm text-gray-500">per night</div>
+      </div>
+    </div>
+
+    <!-- Hero Image -->
+    <div class="rounded-2xl overflow-hidden mb-8 shadow-md">
+      <img
+        [src]="imageUrl"
+        [alt]="listing.name"
+        (error)="onImageError($event)"
+        class="w-full aspect-[16/9] object-cover"
+      />
+    </div>
+
+    <!-- Stats strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+        <div class="text-2xl font-bold text-gray-900">{{ listing.accommodates }}</div>
+        <div class="text-xs text-gray-500 mt-1">Guests</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+        <div class="text-2xl font-bold text-gray-900">{{ listing.bedrooms || '—' }}</div>
+        <div class="text-xs text-gray-500 mt-1">Bedrooms</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+        <div class="text-2xl font-bold text-gray-900">{{ listing.beds || '—' }}</div>
+        <div class="text-xs text-gray-500 mt-1">Beds</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+        <div class="text-2xl font-bold text-gray-900">{{ listing.bathrooms || '—' }}</div>
+        <div class="text-xs text-gray-500 mt-1">Bathrooms</div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left column -->
+      <div class="lg:col-span-2 space-y-8">
+
+        <!-- Host info -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 font-bold text-lg">
+              {{ listing.hostName.charAt(0) || '?' }}
+            </div>
+            <div>
+              <div class="font-semibold text-gray-900">Hosted by {{ listing.hostName }}</div>
+              <div class="text-sm text-gray-500">{{ listing.propertyType }} · {{ listing.roomType }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div *ngIf="listing.description" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 class="font-bold text-gray-900 text-lg mb-3">About this place</h2>
+          <p class="text-gray-600 text-sm leading-relaxed">{{ listing.description }}</p>
+        </div>
+
+        <!-- Amenities -->
+        <div *ngIf="amenitiesList.length > 0" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 class="font-bold text-gray-900 text-lg mb-4">What this place offers</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div *ngFor="let amenity of amenitiesList" class="flex items-center gap-2 text-sm text-gray-700">
+              <div class="w-5 h-5 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              {{ amenity }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column - Booking card -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-200 sticky top-24">
+          <div class="mb-4">
+            <span class="text-2xl font-bold text-gray-900">{{ listing.price }}</span>
+            <span class="text-gray-500 text-sm ml-1">/ night</span>
+          </div>
+
+          <div class="space-y-3 mb-5">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Property type</span>
+              <span class="font-medium text-gray-900">{{ listing.propertyType }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Room type</span>
+              <span class="font-medium text-gray-900">{{ listing.roomType }}</span>
+            </div>
+            <div class="flex justify-between text-sm" *ngIf="listing.reviewScoresRating">
+              <span class="text-gray-600">Rating</span>
+              <span class="font-medium text-gray-900">{{ listing.reviewScoresRating | number:'1.1-1' }} / 5</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Instant book</span>
+              <span class="font-medium" [class.text-green-600]="listing.instantBookable" [class.text-gray-500]="!listing.instantBookable">
+                {{ listing.instantBookable ? 'Yes' : 'No' }}
+              </span>
+            </div>
+          </div>
+
+          <button class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl transition-colors active:scale-95">
+            Reserve
+          </button>
+          <p class="text-center text-xs text-gray-400 mt-3">You won't be charged yet</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

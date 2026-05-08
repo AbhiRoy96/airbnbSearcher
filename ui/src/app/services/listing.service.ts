@@ -1,0 +1,33 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Listing, AutocompleteSuggestion, PageResponse } from '../models/listing.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ListingService {
+  private readonly baseUrl = 'http://localhost:8080/api/listings';
+
+  constructor(private readonly http: HttpClient) {}
+
+  getAllListings(page: number = 0, size: number = 12): Observable<PageResponse<Listing>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<Listing>>(this.baseUrl, { params });
+  }
+
+  getListingById(id: string): Observable<Listing> {
+    console.log(`Fetching listing with ID: ${id} from ${this.baseUrl}/${id}`);
+    return this.http.get<Listing>(`${this.baseUrl}/${id}`);
+  }
+
+  searchListings(query: string): Observable<Listing[]> {
+    const params = new HttpParams().set('query', query);
+    return this.http.get<Listing[]>(`${this.baseUrl}/search`, { params });
+  }
+
+  autocomplete(q: string): Observable<AutocompleteSuggestion[]> {
+    const params = new HttpParams().set('q', q);
+    return this.http.get<AutocompleteSuggestion[]>(`${this.baseUrl}/autocomplete`, { params });
+  }
+}

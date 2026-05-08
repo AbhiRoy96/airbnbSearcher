@@ -3,6 +3,7 @@ package com.travelerinsider.airbnbsearcher.controller;
 import com.travelerinsider.airbnbsearcher.domain.dto.ListingAutoResponseDTO;
 import com.travelerinsider.airbnbsearcher.domain.dto.ListingResponseDTO;
 import com.travelerinsider.airbnbsearcher.domain.interfaces.IListingService;
+import com.travelerinsider.airbnbsearcher.domain.dto.RestPageImpl;
 import com.travelerinsider.airbnbsearcher.service.elastic.ListingSyncService;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class ListingController {
     private final ListingSyncService listingSyncService;
 
     @GetMapping
-    public ResponseEntity<Page<ListingResponseDTO>> getAllListings(Pageable pageable) {
+    public ResponseEntity<RestPageImpl<ListingResponseDTO>> getAllListings(Pageable pageable) {
         log.info("Fetching all listings with pageable: {}", pageable);
         return ResponseEntity.ok(listingService.getAllListings(pageable));
     }

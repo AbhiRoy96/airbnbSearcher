@@ -11,8 +11,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListingAutoResponseDTO implements Serializable {
-    private Long id;
+    private String id;
     private String name;
-    private String description;
-    private String pictureUrl;
 }
