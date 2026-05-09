@@ -30,7 +30,7 @@ spring:
 
 logging:
   level:
-    com.travelerinsider.airbnbsearcher: ${APP_LOG_LEVEL:INFO}
+    com.travelerinsider.airbnbsearcher: ${APP_LOG_LEVEL:DEBUG}
   pattern:
     level: "%5p [${spring.application.name:},%X{trace_id:-},%X{span_id:-}]"
 

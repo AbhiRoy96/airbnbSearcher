@@ -23,6 +23,7 @@ export interface Listing {
 export interface AutocompleteSuggestion {
   id: string;
   name: string;
+  type?: string;
 }
 
 export interface PageResponse<T> {

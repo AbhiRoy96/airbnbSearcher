@@ -21,9 +21,18 @@ export class ListingService {
     return this.http.get<Listing>(`${this.baseUrl}/${id}`);
   }
 
-  searchListings(query: string): Observable<Listing[]> {
-    const params = new HttpParams().set('query', query);
-    return this.http.get<Listing[]>(`${this.baseUrl}/search`, { params });
+  searchListings(query: string, page: number = 0, size: number = 12, filters: any = {}): Observable<PageResponse<Listing>> {
+    let params = new HttpParams()
+      .set('query', query)
+      .set('page', page)
+      .set('size', size);
+
+    if (filters.propertyType) params = params.set('propertyType', filters.propertyType);
+    if (filters.roomType) params = params.set('roomType', filters.roomType);
+    if (filters.minPrice) params = params.set('minPrice', filters.minPrice);
+    if (filters.maxPrice) params = params.set('maxPrice', filters.maxPrice);
+
+    return this.http.get<PageResponse<Listing>>(`${this.baseUrl}/search`, { params });
   }
 
   autocomplete(q: string): Observable<AutocompleteSuggestion[]> {

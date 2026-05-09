@@ -20,6 +20,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   suggestions: AutocompleteSuggestion[] = [];
   showSuggestions = false;
   isLoading = false;
+  selectedIndex = -1;
 
   private input$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -39,6 +40,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   onInput() {
+    this.selectedIndex = -1;
     this.input$.next(this.query);
     if (!this.query) {
       this.suggestions = [];
@@ -57,6 +59,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   selectSuggestion(suggestion: AutocompleteSuggestion) {
     this.query = suggestion.name;
     this.showSuggestions = false;
+    this.selectedIndex = -1;
     this.search.emit(suggestion.name);
   }
 
@@ -70,6 +73,21 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   onKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       this.showSuggestions = false;
+    } else if (event.key === 'ArrowDown') {
+      if (this.showSuggestions && this.suggestions.length > 0) {
+        event.preventDefault();
+        this.selectedIndex = (this.selectedIndex + 1) % this.suggestions.length;
+      }
+    } else if (event.key === 'ArrowUp') {
+      if (this.showSuggestions && this.suggestions.length > 0) {
+        event.preventDefault();
+        this.selectedIndex = (this.selectedIndex - 1 + this.suggestions.length) % this.suggestions.length;
+      }
+    } else if (event.key === 'Enter') {
+      if (this.showSuggestions && this.selectedIndex >= 0) {
+        event.preventDefault();
+        this.selectSuggestion(this.suggestions[this.selectedIndex]);
+      }
     }
   }
 

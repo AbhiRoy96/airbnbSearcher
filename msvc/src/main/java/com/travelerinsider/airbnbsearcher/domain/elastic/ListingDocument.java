@@ -61,13 +61,23 @@ public class ListingDocument {
     @Field(type = FieldType.Text)
     private String hostUrl;
 
-    @Field(type = FieldType.Text)
+    @MultiField(
+        mainField = @Field(type = FieldType.Text),
+        otherFields = {
+            @InnerField(suffix = "autocomplete", type = FieldType.Search_As_You_Type)
+        }
+    )
     private String hostName;
 
     @Field(type = FieldType.Date)
     private LocalDate hostSince;
 
-    @Field(type = FieldType.Text)
+    @MultiField(
+        mainField = @Field(type = FieldType.Text),
+        otherFields = {
+            @InnerField(suffix = "autocomplete", type = FieldType.Search_As_You_Type)
+        }
+    )
     private String hostLocation;
 
     @Field(type = FieldType.Text)
@@ -112,7 +122,12 @@ public class ListingDocument {
     @Field(type = FieldType.Keyword)
     private String neighbourhood;
 
-    @Field(type = FieldType.Keyword)
+    @MultiField(
+        mainField = @Field(type = FieldType.Keyword),
+        otherFields = {
+            @InnerField(suffix = "autocomplete", type = FieldType.Search_As_You_Type)
+        }
+    )
     private String neighbourhoodCleansed;
 
     @Field(type = FieldType.Keyword)

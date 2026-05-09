@@ -14,8 +14,10 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,22 +65,36 @@ public class ListingServiceImpl implements IListingService {
     }
 
     @Override
-    @Cacheable(value = "listingSearch", key = "#query")
+    @Cacheable(
+            value = "listingSearch",
+            key = "{#query, #pageable.pageNumber, #pageable.pageSize, #propertyType, #roomType, #minPrice, #maxPrice}"
+    )
     @WithSpan("airbnb.service.listings.search")
-    public List<ListingResponseDTO> searchListings(String query) {
+    public RestPageImpl<ListingResponseDTO> searchListings(String query, Pageable pageable,
+                                                           String propertyType, String roomType,
+                                                           Double minPrice, Double maxPrice) {
         long start = System.nanoTime();
-        log.debug("Searching listings from Elasticsearch queryLength={}", length(query));
+        log.debug("Searching listings from Elasticsearch queryLength={} pageNumber={} pageSize={}",
+                length(query), pageable.getPageNumber(), pageable.getPageSize());
+
         if (query == null || query.isBlank()) {
             log.debug("Skipping listing search for blank query elapsedMs={}", elapsedMillis(start));
-            return List.of();
+            return new RestPageImpl<>(List.of(), pageable, 0L);
         }
-        List<ListingResponseDTO> results = listingElasticRepository.findByQuery(query)
+
+        SearchPage<ListingDocument> searchPage = listingElasticRepository.search(
+                query, propertyType, roomType, minPrice, maxPrice, pageable);
+
+        List<ListingResponseDTO> results = searchPage.getSearchHits()
                 .stream()
+                .map(SearchHit::getContent)
                 .map(this::mapDocumentToDTO)
                 .collect(Collectors.toList());
-        log.debug("Completed Elasticsearch listing search resultCount={} elapsedMs={}",
-                results.size(), elapsedMillis(start));
-        return results;
+
+        log.debug("Completed Elasticsearch listing search resultCount={} totalElements={} elapsedMs={}",
+                results.size(), searchPage.getTotalElements(), elapsedMillis(start));
+
+        return new RestPageImpl<>(results, pageable, searchPage.getTotalElements());
     }
 
     @Override
@@ -91,19 +107,30 @@ public class ListingServiceImpl implements IListingService {
             log.debug("Skipping listing autocomplete for blank prefix elapsedMs={}", elapsedMillis(start));
             return List.of();
         }
-        List<ListingAutoResponseDTO> results = listingElasticRepository.autocomplete(prefix)
+        List<ListingAutoResponseDTO> results = listingElasticRepository.autocomplete(prefix, PageRequest.of(0, 20))
                 .stream()
-                .map(this::mapDocumentToAutoDTO)
+                .map(doc -> mapDocumentToAutoDTO(doc, prefix))
                 .collect(Collectors.toList());
         log.debug("Completed Elasticsearch listing autocomplete resultCount={} elapsedMs={}",
                 results.size(), elapsedMillis(start));
         return results;
     }
 
-    private ListingAutoResponseDTO mapDocumentToAutoDTO(ListingDocument doc) {
+    private ListingAutoResponseDTO mapDocumentToAutoDTO(ListingDocument doc, String prefix) {
+        String type = "property name";
+        String lowerPrefix = prefix.toLowerCase();
+
+        if (doc.getHostName() != null && doc.getHostName().toLowerCase().contains(lowerPrefix)) {
+            type = "host";
+        } else if ((doc.getHostLocation() != null && doc.getHostLocation().toLowerCase().contains(lowerPrefix)) ||
+                   (doc.getNeighbourhoodCleansed() != null && doc.getNeighbourhoodCleansed().toLowerCase().contains(lowerPrefix))) {
+            type = "neighbourhood";
+        }
+
         return ListingAutoResponseDTO.builder()
                 .id(String.valueOf(doc.getId()))
                 .name(doc.getName())
+                .type(type)
                 .build();
     }
 
