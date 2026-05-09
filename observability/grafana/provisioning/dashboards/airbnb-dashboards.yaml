@@ -1,0 +1,14 @@
+apiVersion: 1
+
+providers:
+  - name: airbnb-searcher-observability
+    orgId: 1
+    folder: Airbnb Searcher
+    folderUid: airbnb-searcher
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /otel-lgtm/grafana/dashboards/airbnb
+      foldersFromFilesStructure: false
