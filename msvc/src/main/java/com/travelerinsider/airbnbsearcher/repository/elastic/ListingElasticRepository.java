@@ -2,24 +2,19 @@ package com.travelerinsider.airbnbsearcher.repository.elastic;
 
 import com.travelerinsider.airbnbsearcher.domain.elastic.ListingDocument;
 import org.springframework.data.elasticsearch.annotations.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface ListingElasticRepository extends ElasticsearchRepository<ListingDocument, Long> {
-
-    @Query("""
-            {
-              "multi_match": {
-                "query": "?0",
-                "fields": ["name", "description"],
-                "operator": "and"
-              }
-            }
-            """)
-    List<ListingDocument> findByQuery(String query);
+public interface ListingElasticRepository extends
+        ElasticsearchRepository<ListingDocument, Long>,
+        ListingElasticRepositoryCustom  {
 
     /**
      * Autocomplete using the search_as_you_type sub-field on name.
@@ -34,10 +29,19 @@ public interface ListingElasticRepository extends ElasticsearchRepository<Listin
                 "fields": [
                   "name.autocomplete",
                   "name.autocomplete._2gram",
-                  "name.autocomplete._3gram"
+                  "name.autocomplete._3gram",
+                  "hostName.autocomplete",
+                  "hostName.autocomplete._2gram",
+                  "hostName.autocomplete._3gram",
+                  "hostLocation.autocomplete",
+                  "hostLocation.autocomplete._2gram",
+                  "hostLocation.autocomplete._3gram",
+                  "neighbourhoodCleansed.autocomplete",
+                  "neighbourhoodCleansed.autocomplete._2gram",
+                  "neighbourhoodCleansed.autocomplete._3gram"
                 ]
               }
             }
             """)
-    List<ListingDocument> autocomplete(String prefix);
+    List<ListingDocument> autocomplete(String prefix, Pageable pageable);
 }

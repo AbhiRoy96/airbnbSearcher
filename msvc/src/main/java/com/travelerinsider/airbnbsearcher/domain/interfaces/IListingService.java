@@ -10,6 +10,6 @@ import org.springframework.data.domain.Pageable;
 public interface IListingService {
     RestPageImpl<ListingResponseDTO> getAllListings(Pageable pageable);
     ListingResponseDTO getListingById(Long id);
-    List<ListingResponseDTO> searchListings(String query);
+    RestPageImpl<ListingResponseDTO> searchListings(String query, Pageable pageable, String propertyType, String roomType, Double minPrice, Double maxPrice);
     List<ListingAutoResponseDTO> autocomplete(String prefix);
 }

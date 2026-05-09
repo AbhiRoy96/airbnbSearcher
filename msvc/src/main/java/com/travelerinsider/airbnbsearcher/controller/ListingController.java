@@ -46,7 +46,10 @@ public class ListingController {
 
     @GetMapping
     @WithSpan("airbnb.api.listings.get-all")
-    public ResponseEntity<RestPageImpl<ListingResponseDTO>> getAllListings(Pageable pageable) {
+    public ResponseEntity<RestPageImpl<ListingResponseDTO>> getAllListings(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
         long start = System.nanoTime();
         log.info("Fetching listings pageNumber={} pageSize={} sort={}",
                 pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
@@ -69,13 +72,23 @@ public class ListingController {
 
     @GetMapping("/search")
     @WithSpan("airbnb.api.listings.search")
-    public ResponseEntity<List<ListingResponseDTO>> searchListings(@RequestParam String query) {
+    public ResponseEntity<RestPageImpl<ListingResponseDTO>> searchListings(
+            @RequestParam String query,
+            @RequestParam(required = false) String propertyType,
+            @RequestParam(required = false) String roomType,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
         long start = System.nanoTime();
-        log.info("Searching listings queryLength={}", length(query));
+        log.info("Searching listings queryLength={} pageNumber={} pageSize={}",
+                length(query), pageable.getPageNumber(), pageable.getPageSize());
         log.debug("Searching listings query='{}'", query);
         listingSearchCounter.increment();
-        List<ListingResponseDTO> response = listingService.searchListings(query);
-        log.info("Completed listing search resultCount={} elapsedMs={}", response.size(), elapsedMillis(start));
+        RestPageImpl<ListingResponseDTO> response = listingService.searchListings(query, pageable, propertyType, roomType, minPrice, maxPrice);
+        log.info("Completed listing search resultCount={} totalElements={} elapsedMs={}",
+                response.getNumberOfElements(), response.getTotalElements(), elapsedMillis(start));
         return ResponseEntity.ok(response);
     }
 
