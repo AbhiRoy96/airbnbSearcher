@@ -32,9 +32,12 @@ logging:
   level:
     com.travelerinsider.airbnbsearcher: ${APP_LOG_LEVEL:DEBUG}
   pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [${spring.application.name:},%X{trace_id:-},%X{span_id:-}] %logger{36} - %msg%n%wEx"
     level: "%5p [${spring.application.name:},%X{trace_id:-},%X{span_id:-}]"
 
 management:
+  server:
+    port: 8081
   endpoints:
     web:
       exposure:

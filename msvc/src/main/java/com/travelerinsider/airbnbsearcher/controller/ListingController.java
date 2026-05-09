@@ -8,9 +8,11 @@ import com.travelerinsider.airbnbsearcher.service.elastic.ListingSyncService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/listings")
 @Slf4j
+@Validated
 public class ListingController {
 
     private final IListingService listingService;
@@ -73,7 +76,7 @@ public class ListingController {
     @GetMapping("/search")
     @WithSpan("airbnb.api.listings.search")
     public ResponseEntity<RestPageImpl<ListingResponseDTO>> searchListings(
-            @RequestParam String query,
+            @RequestParam @Size(max = 200) String query,
             @RequestParam(required = false) String propertyType,
             @RequestParam(required = false) String roomType,
             @RequestParam(required = false) Double minPrice,
@@ -94,7 +97,7 @@ public class ListingController {
 
     @GetMapping("/autocomplete")
     @WithSpan("airbnb.api.listings.autocomplete")
-    public ResponseEntity<List<ListingAutoResponseDTO>> autocomplete(@RequestParam String q) {
+    public ResponseEntity<List<ListingAutoResponseDTO>> autocomplete(@RequestParam @Size(max = 200) String q) {
         long start = System.nanoTime();
         log.info("Autocomplete listings prefixLength={}", length(q));
         log.debug("Autocomplete listings prefix='{}'", q);

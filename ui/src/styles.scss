@@ -26,4 +26,24 @@ html, body {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  .animate-ripple {
+    background: linear-gradient(
+      90deg,
+      #f3f4f6 0%,
+      #e5e7eb 50%,
+      #f3f4f6 100%
+    );
+    background-size: 200% 100%;
+    animation: ripple 1.5s infinite linear;
+  }
+
+  @keyframes ripple {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
 }

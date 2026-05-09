@@ -28,7 +28,7 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       - targets:
-          - airbnb-app:8080
+          - airbnb-app:8081
         labels:
           service: airbnbSearcher
 
