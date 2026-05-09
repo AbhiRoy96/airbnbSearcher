@@ -3,11 +3,17 @@
 
   <!-- Image -->
   <div class="relative overflow-hidden aspect-[4/3] bg-gray-100 flex-shrink-0">
+    <!-- Ripple Effect Loader -->
+    <div *ngIf="isImageLoading" class="absolute inset-0 animate-ripple"></div>
+
     <img
       [src]="imageUrl"
       [alt]="listing.name"
       (error)="onImageError($event)"
-      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      (load)="onImageLoad()"
+      [class.opacity-0]="isImageLoading"
+      [class.opacity-100]="!isImageLoading"
+      class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
     />
     <!-- Instant bookable badge -->
     <div *ngIf="listing.instantBookable"

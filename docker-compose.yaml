@@ -5,9 +5,9 @@ services:
     networks:
       - app-net
     environment:
-      POSTGRES_DB: airbnb_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5436:5432"
     healthcheck:
@@ -57,7 +57,7 @@ services:
     networks:
       - app-net
     environment:
-      DATA_SOURCE_NAME: postgresql://user:password@postgres:5432/airbnb_db?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,13 +93,14 @@ services:
       - app-net
     ports:
       - "8080:8080"
+      - "8081:8081"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/airbnb_db
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
-      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_ELASTICSEARCH_URIS=${SPRING_ELASTICSEARCH_URIS}
+      - SPRING_DATA_REDIS_HOST=${SPRING_DATA_REDIS_HOST}
+      - SPRING_DATA_REDIS_PORT=${SPRING_DATA_REDIS_PORT}
       - JAVA_OPTS=-Xmx512m -Xms256m
       # OpenTelemetry Java agent exports traces, metrics, and logs to Grafana LGTM.
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://grafana-lgtm:4318

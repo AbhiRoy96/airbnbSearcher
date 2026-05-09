@@ -65,9 +65,9 @@
 
       <!-- Loading State -->
       <div *ngIf="isLoading || isSearching" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div *ngFor="let s of skeletons" class="bg-white rounded-2xl overflow-hidden shadow-sm animate-pulse">
-          <div class="aspect-[4/3] bg-gray-200"></div>
-          <div class="p-4 space-y-3">
+        <div *ngFor="let s of skeletons" class="bg-white rounded-2xl overflow-hidden shadow-sm">
+          <div class="aspect-[4/3] animate-ripple"></div>
+          <div class="p-4 space-y-3 animate-pulse">
             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
             <div class="h-4 bg-gray-200 rounded w-4/5"></div>
             <div class="h-3 bg-gray-200 rounded w-3/5"></div>

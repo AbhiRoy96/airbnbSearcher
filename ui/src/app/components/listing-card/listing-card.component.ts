@@ -11,6 +11,7 @@ import { Listing } from '../../models/listing.model';
 })
 export class ListingCardComponent {
   @Input() listing!: Listing;
+  isImageLoading = true;
 
   get stars(): number[] {
     const r = Math.round(this.listing.reviewScoresRating ?? 0);
@@ -32,5 +33,10 @@ export class ListingCardComponent {
 
   onImageError(event: Event) {
     (event.target as HTMLImageElement).src = 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image';
+    this.isImageLoading = false;
+  }
+
+  onImageLoad() {
+    this.isImageLoading = false;
   }
 }
