@@ -229,7 +229,7 @@
       },
       "targets": [
         {
-          "expr": "min(elasticsearch_cluster_health_up{job=\"elasticsearch-exporter\"})",
+          "expr": "min(elasticsearch_clusterinfo_up{job=\"elasticsearch-exporter\"})",
           "instant": true,
           "legendFormat": "Elasticsearch",
           "refId": "A"

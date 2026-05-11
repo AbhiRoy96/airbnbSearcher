@@ -381,7 +381,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: min(elasticsearch_cluster_health_up{job="elasticsearch-exporter"})
+              expr: min(elasticsearch_clusterinfo_up{job="elasticsearch-exporter"})
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200

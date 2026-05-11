@@ -1,6 +1,8 @@
-# Airbnb Searcher Kubernetes & Istio Deployment
+# Airbnb Searcher Kubernetes, Helm & Observability Deployment
 
-This directory contains the Helm chart and documentation for deploying the Airbnb Searcher application to a Kubernetes cluster with Istio support.
+This directory contains Helm-based deployment docs for:
+- Airbnb Searcher application
+- Observability stack (Grafana LGTM)
 
 ## Prerequisites
 
@@ -15,8 +17,8 @@ This directory contains the Helm chart and documentation for deploying the Airbn
 The images are automatically built and published to GHCR (GitHub Container Registry) on every push to the `main` branch.
 
 Images:
-- `ghcr.io/<OWNER>/airbnb-searcher-backend`
-- `ghcr.io/<OWNER>/airbnb-searcher-frontend`
+- `ghcr.io/abhiroy96/airbnbsearcher-backend`
+- `ghcr.io/abhiroy96/airbnbsearcher-frontend`
 
 ### Manual Build
 Before deploying locally, you can build and tag the Docker images:
@@ -34,23 +36,83 @@ docker build -t airbnb-ui:latest .
 If using minikube, remember to point your shell to minikube's docker daemon:
 `eval $(minikube docker-env)`
 
-## Deployment with Helm
+## Deploy Observability (Helm)
 
-1.  **Configure values**: Update `k8s/helm/airbnb-searcher/values.yaml` with your specific configuration. **Note**: Replace `<OWNER>` in the image repository fields with your GitHub username/organization.
+Deploy observability first so OTLP traffic from Airbnb Searcher has a target service.
+
+```bash
+kubectl create namespace observability --dry-run=client -o yaml | kubectl apply -f -
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+helm upgrade --install grafana-lgtm grafana/lgtm-distributed \
+  -n observability \
+  --create-namespace
+```
+
+Verify:
+
+```bash
+kubectl get pods -n observability
+kubectl get svc -n observability
+helm list -n observability
+```
+
+## Deploy Airbnb Searcher (Helm)
+
+1.  **Configure values**: The default values are already wired to prebuilt GHCR images:
+    - `ghcr.io/abhiroy96/airbnbsearcher-backend:latest`
+    - `ghcr.io/abhiroy96/airbnbsearcher-frontend:latest`
+
+    If you want to deploy a specific immutable build, override tags at install time:
+    ```bash
+    helm upgrade --install airbnb-searcher ./airbnb-searcher \
+      -n airbnb-searcher \
+      --set msvc.image.tag=sha-d12bf6a \
+      --set ui.image.tag=sha-d12bf6a
+    ```
+
+    If your GHCR packages are private, create a pull secret and reference it:
+    ```bash
+    kubectl create secret docker-registry ghcr-creds \
+      --docker-server=ghcr.io \
+      --docker-username=<github-username> \
+      --docker-password=<github-token-with-read:packages> \
+      --docker-email=<email>
+    ```
+    Then set:
+    ```yaml
+    global:
+      imagePullSecrets:
+        - name: ghcr-creds
+    ```
 
 2.  **Install the chart**:
     ```bash
     cd k8s/helm
-    helm install airbnb-searcher ./airbnb-searcher
+    helm upgrade --install airbnb-searcher ./airbnb-searcher \
+      --create-namespace \
+      -n airbnb-searcher
     ```
 
 3.  **Verify the deployment**:
     ```bash
-    kubectl get pods
-    kubectl get svc
-    kubectl get gateway
-    kubectl get virtualservice
+    kubectl get pods -n airbnb-searcher
+    kubectl get svc -n airbnb-searcher
+    kubectl get gateway -n airbnb-searcher
+    kubectl get virtualservice -n airbnb-searcher
+    helm list -n airbnb-searcher
     ```
+
+## Re-Deploy / Upgrade
+
+```bash
+# Observability
+helm upgrade --install grafana-lgtm grafana/lgtm-distributed -n observability
+
+# Airbnb Searcher
+helm upgrade --install airbnb-searcher ./k8s/helm/airbnb-searcher -n airbnb-searcher
+```
 
 ## Accessing the Application
 
@@ -67,6 +129,10 @@ If Istio is enabled, the application will be accessible through the Istio Ingres
 3.  **Open in browser**:
     Navigate to `http://airbnb.local`
 
-## Observability
+## Observability Endpoint
 
-The application is pre-configured to export traces and metrics to `grafana-lgtm`. Ensure you have a service named `grafana-lgtm` in your cluster or update the `OTEL_EXPORTER_OTLP_ENDPOINT` in `values.yaml`.
+The app is configured with:
+
+- `OTEL_EXPORTER_OTLP_ENDPOINT=http://grafana-lgtm.observability:4318`
+
+If your LGTM service name differs, update `k8s/helm/airbnb-searcher/values.yaml` (`msvc.env.OTEL_EXPORTER_OTLP_ENDPOINT`) or override it during Helm install.

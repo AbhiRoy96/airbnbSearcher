@@ -1,99 +1,126 @@
 # Airbnb Searcher
 
-A full-stack application for searching Airbnb listings, built with Spring Boot, Angular, and Elasticsearch.
+A full-stack application for searching and exploring Airbnb listings with fast search, filters, and observability.
 
-## Project Overview
-
-Airbnb Searcher provides a powerful search interface for Airbnb listings. It leverages Elasticsearch for fast and efficient searching, Redis for caching, and PostgreSQL for persistent data storage. The application is also equipped with observability features using OpenTelemetry.
+It includes:
+- `ui/`: Angular frontend
+- `msvc/`: Spring Boot backend API
+- PostgreSQL + Elasticsearch + Redis
+- Observability via Grafana LGTM + OpenTelemetry
 
 ## Architecture
 
-The project consists of several components:
+- Frontend (`ui`) calls backend REST APIs.
+- Backend (`msvc`) reads listing data from PostgreSQL, indexes/searches with Elasticsearch, and uses Redis for caching.
+- Backend exports telemetry to LGTM for metrics, traces, and logs.
 
-*   **Frontend (`ui/`):** An Angular application providing the user interface for searching and viewing listing details.
-*   **Backend (`msvc/`):** A Spring Boot microservice that handles search requests, interacts with databases, and manages data.
-*   **Databases:**
-    *   **Elasticsearch:** Used for indexing and searching listing data.
-    *   **PostgreSQL:** Used as the primary relational database for listing metadata.
-    *   **Redis:** Used for caching frequently accessed data.
-*   **Observability:** A pre-configured Grafana LGTM stack for monitoring and tracing.
+## Tech Stack
 
-## Technologies Used
-
-*   **Frontend:** Angular 19, Tailwind CSS, RxJS.
-*   **Backend:** Java 21, Spring Boot 4.0.6, Spring Data JPA, Spring Data Elasticsearch, Spring Data Redis.
-*   **Databases:** PostgreSQL 16, Elasticsearch 9.0.2, Redis 7.
-*   **Observability:** OpenTelemetry.
-*   **DevOps:** Docker, Docker Compose, Kubernetes, Helm, Istio.
+- Frontend: Angular 19, Tailwind CSS, RxJS
+- Backend: Java 21, Spring Boot 4.0.6, Spring Data (JPA, Elasticsearch, Redis)
+- Datastores: PostgreSQL 16, Elasticsearch 9.0.2, Redis 7
+- Observability: OpenTelemetry + Grafana LGTM
+- Deployments: Docker Compose, Kubernetes (Helm + optional Istio)
 
 ## Prerequisites
 
-*   Java 21 or higher
-*   Node.js and npm
-*   Docker and Docker Compose
-*   Maven
+- Docker + Docker Compose
+- Node.js 20+ and npm (for local frontend dev)
+- Java 21 and Maven (for local backend dev)
+- Optional for K8s: `kubectl`, `helm`, and Istio
 
-## Getting Started
+## Quick Start (Docker Compose + Local Frontend)
 
-### Running with Docker Compose
+From repo root:
 
-The easiest way to get the entire stack up and running is using Docker Compose.
-
-1.  **Start the services from the root directory:**
-    ```bash
-    docker-compose up -d
-    ```
-    This will start PostgreSQL, Elasticsearch, Redis, the backend application, and Grafana LGTM.
-
-2.  **Navigate to the `ui` directory and start the frontend:**
-    ```bash
-    cd ui
-    npm install
-    npm start
-    ```
-    The frontend will be available at `http://localhost:4200`.
-
-### Kubernetes Deployment (Helm & Istio)
-
-For production-like environments, you can deploy the entire stack using Helm on a Kubernetes cluster with Istio.
-
-1.  **Navigate to the `k8s` directory:**
-    ```bash
-    cd k8s
-    ```
-2.  **Follow the instructions in [k8s/README.md](./k8s/README.md)** to build images and deploy the Helm chart.
-
-The Helm chart includes:
-- Backend & Frontend deployments.
-- Managed PostgreSQL, Elasticsearch, and Redis (Bitnami-based/compatible).
-- Istio Gateway and VirtualService for traffic management.
-
-### Local Development
-
-#### Backend
-Navigate to `msvc/` and run:
 ```bash
-./mvnw spring-boot:run
-```
-Make sure the required databases (Postgres, ES, Redis) are running and accessible via the configuration in `application.properties` or environment variables.
+# 1) Export env vars required by docker-compose
+export POSTGRES_DB=airbnb_db
+export POSTGRES_USER=user
+export POSTGRES_PASSWORD=password
+export SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/airbnb_db
+export SPRING_DATASOURCE_USERNAME=user
+export SPRING_DATASOURCE_PASSWORD=password
+export SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+export SPRING_DATA_REDIS_HOST=redis
+export SPRING_DATA_REDIS_PORT=6379
 
-#### Frontend
-Navigate to `ui/` and run:
-```bash
+# 2) Start backend dependencies + backend service + observability
+docker-compose up -d
+
+# 3) Start frontend in dev mode
+cd ui
+npm install
 npm start
 ```
 
-## Observability
+App URLs:
+- Frontend: `http://localhost:4200`
+- Backend API: `http://localhost:8080`
+- Backend health/metrics port: `http://localhost:8081/actuator/health`
+- Grafana: `http://localhost:3000` (`admin` / `admin`)
 
-The project includes an observability stack (Grafana LGTM) integrated into the main `docker-compose.yaml`. You can access Grafana at `http://localhost:3000` (admin/admin).
+## Local Development
+
+### Backend
+
+```bash
+cd msvc
+./mvnw spring-boot:run
+```
+
+Backend config is in `msvc/src/main/resources/application.yaml` and supports environment overrides:
+- `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
+- `SPRING_ELASTICSEARCH_URIS`
+- `SPRING_DATA_REDIS_HOST`, `SPRING_DATA_REDIS_PORT`
+
+### Frontend
+
+```bash
+cd ui
+npm install
+npm start
+```
+
+The frontend currently calls `http://localhost:8080/api/listings`.
+
+## API Endpoints
+
+Base path: `/api/listings`
+
+- `GET /api/listings?page=0&size=12` - paginated listings
+- `GET /api/listings/{id}` - listing by id
+- `GET /api/listings/search?query=...` - search with optional filters
+- `GET /api/listings/autocomplete?q=...` - autocomplete suggestions
+- `POST /api/listings/sync` - trigger full Elasticsearch sync
+
+Note: search/autocomplete routes are rate-limited per client IP.
+
+## Data Notes
+
+- SQL migration/reference script: `data/data_migration.sql`
+- DB model snapshot: `data/data-model-snapshot.json`
+
+`DataIndexer` triggers a full listing sync to Elasticsearch on backend startup.
+
+## Kubernetes Deployment
+
+For Helm/K8s setup, see [`k8s/README.md`](./k8s/README.md).
+
+The chart supports:
+- Backend + frontend deployments
+- Postgres + Elasticsearch + Redis workloads
+- Optional Istio resources
 
 ## Project Structure
 
-```
+```text
 .
-├── data/               # Data snapshots and SQL migration scripts
-├── k8s/                # Kubernetes manifests and Helm charts
-├── msvc/               # Spring Boot backend application
-├── observability/      # Observability configuration (OpenTelemetry)
-└── ui/                 # Angular frontend application
+├── data/             # SQL migration and schema snapshot artifacts
+├── k8s/              # Helm chart and K8s deployment docs
+├── msvc/             # Spring Boot backend API
+├── observability/    # Grafana/Prometheus provisioning and dashboards
+├── ui/               # Angular frontend app
+├── docker-compose.yaml
+└── README.md
 ```

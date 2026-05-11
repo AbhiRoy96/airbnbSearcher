@@ -37,4 +37,20 @@ spec:
             host: airbnb-ui
             port:
               number: 80
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: airbnb-searcher-telemetry
+spec:
+  accessLogging:
+    - providers:
+        - name: {{ .Values.istio.telemetry.accessLog.provider | quote }}
+  metrics:
+    - providers:
+        - name: {{ .Values.istio.telemetry.metrics.provider | quote }}
+  tracing:
+    - providers:
+        - name: {{ .Values.istio.telemetry.tracing.provider | quote }}
+      randomSamplingPercentage: {{ .Values.istio.telemetry.tracing.randomSamplingPercentage }}
 {{- end }}

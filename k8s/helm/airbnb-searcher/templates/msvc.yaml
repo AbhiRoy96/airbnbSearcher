@@ -27,7 +27,19 @@ spec:
     metadata:
       labels:
         app: airbnb-msvc
+      {{- if .Values.istio.enabled }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.istio.io/merge-metrics: "true"
+        proxy.istio.io/config: |
+          tracing:
+            sampling: {{ .Values.istio.telemetry.tracing.randomSamplingPercentage }}
+      {{- end }}
     spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: airbnb-msvc
           image: "{{ .Values.msvc.image.repository }}:{{ .Values.msvc.image.tag }}"
@@ -50,8 +62,36 @@ spec:
               value: {{ .Values.msvc.env.SPRING_DATA_REDIS_PORT | quote }}
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ .Values.msvc.env.OTEL_EXPORTER_OTLP_ENDPOINT | quote }}
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: {{ .Values.msvc.env.OTEL_EXPORTER_OTLP_PROTOCOL | quote }}
+            - name: OTEL_TRACES_EXPORTER
+              value: {{ .Values.msvc.env.OTEL_TRACES_EXPORTER | quote }}
+            - name: OTEL_METRICS_EXPORTER
+              value: {{ .Values.msvc.env.OTEL_METRICS_EXPORTER | quote }}
+            - name: OTEL_LOGS_EXPORTER
+              value: {{ .Values.msvc.env.OTEL_LOGS_EXPORTER | quote }}
+            - name: OTEL_TRACES_SAMPLER
+              value: {{ .Values.msvc.env.OTEL_TRACES_SAMPLER | quote }}
+            - name: OTEL_METRIC_EXPORT_INTERVAL
+              value: {{ .Values.msvc.env.OTEL_METRIC_EXPORT_INTERVAL | quote }}
+            - name: OTEL_PROPAGATORS
+              value: {{ .Values.msvc.env.OTEL_PROPAGATORS | quote }}
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: {{ .Values.msvc.env.OTEL_RESOURCE_ATTRIBUTES | quote }}
+            - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED
+              value: {{ .Values.msvc.env.OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED | quote }}
+            - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES
+              value: {{ .Values.msvc.env.OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES | quote }}
+            - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_MDC_ATTRIBUTES
+              value: {{ .Values.msvc.env.OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_MDC_ATTRIBUTES | quote }}
+            - name: OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED
+              value: {{ .Values.msvc.env.OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED | quote }}
+            - name: OTEL_JAVAAGENT_DEBUG
+              value: {{ .Values.msvc.env.OTEL_JAVAAGENT_DEBUG | quote }}
             - name: OTEL_SERVICE_NAME
               value: airbnbSearcher
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.msvc.env.APP_LOG_LEVEL | quote }}
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

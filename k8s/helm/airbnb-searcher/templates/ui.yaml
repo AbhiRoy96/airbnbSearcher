@@ -23,7 +23,18 @@ spec:
     metadata:
       labels:
         app: airbnb-ui
+      {{- if .Values.istio.enabled }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        proxy.istio.io/config: |
+          tracing:
+            sampling: {{ .Values.istio.telemetry.tracing.randomSamplingPercentage }}
+      {{- end }}
     spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: airbnb-ui
           image: "{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag }}"

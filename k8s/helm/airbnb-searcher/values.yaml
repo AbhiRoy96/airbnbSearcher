@@ -1,12 +1,13 @@
 # Global settings
 global:
   domain: airbnb.local
+  imagePullSecrets: []
 
 # Frontend (UI) settings
 ui:
   enabled: true
   image:
-    repository: ghcr.io/<OWNER>/airbnb-searcher-frontend
+    repository: ghcr.io/abhiroy96/airbnbsearcher-frontend
     tag: latest
     pullPolicy: IfNotPresent
   replicaCount: 1
@@ -18,7 +19,7 @@ ui:
 msvc:
   enabled: true
   image:
-    repository: ghcr.io/<OWNER>/airbnb-searcher-backend
+    repository: ghcr.io/abhiroy96/airbnbsearcher-backend
     tag: latest
     pullPolicy: IfNotPresent
   replicaCount: 1
@@ -33,7 +34,21 @@ msvc:
     SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
     SPRING_DATA_REDIS_HOST: redis
     SPRING_DATA_REDIS_PORT: 6379
-    OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-lgtm:4318
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-lgtm.observability:4318
+    OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    OTEL_TRACES_EXPORTER: otlp
+    OTEL_METRICS_EXPORTER: otlp
+    OTEL_LOGS_EXPORTER: otlp
+    OTEL_TRACES_SAMPLER: always_on
+    OTEL_METRIC_EXPORT_INTERVAL: 10000
+    OTEL_PROPAGATORS: tracecontext,baggage
+    OTEL_RESOURCE_ATTRIBUTES: service.namespace=airbnb-searcher,deployment.environment=k8s
+    OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED: "true"
+    OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES: "true"
+    OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_MDC_ATTRIBUTES: "*"
+    OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED: "true"
+    OTEL_JAVAAGENT_DEBUG: "false"
+    APP_LOG_LEVEL: INFO
 
 # PostgreSQL settings
 postgres:
@@ -59,6 +74,18 @@ redis:
   enabled: true
   image: redis:7-alpine
 
+# Metrics exporters
+exporters:
+  postgres:
+    enabled: true
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+  redis:
+    enabled: true
+    image: oliver006/redis_exporter:v1.62.0
+  elasticsearch:
+    enabled: true
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:v1.7.0
+
 # Istio settings
 istio:
   enabled: true
@@ -66,3 +93,11 @@ istio:
     name: airbnb-gateway
     selector:
       istio: ingressgateway
+  telemetry:
+    accessLog:
+      provider: envoy
+    metrics:
+      provider: prometheus
+    tracing:
+      provider: jaeger
+      randomSamplingPercentage: 100
