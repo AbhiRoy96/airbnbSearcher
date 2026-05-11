@@ -24,7 +24,7 @@ The project consists of several components:
 *   **Backend:** Java 21, Spring Boot 4.0.6, Spring Data JPA, Spring Data Elasticsearch, Spring Data Redis.
 *   **Databases:** PostgreSQL 16, Elasticsearch 9.0.2, Redis 7.
 *   **Observability:** OpenTelemetry.
-*   **DevOps:** Docker, Docker Compose.
+*   **DevOps:** Docker, Docker Compose, Kubernetes, Helm, Istio.
 
 ## Prerequisites
 
@@ -53,6 +53,21 @@ The easiest way to get the entire stack up and running is using Docker Compose.
     ```
     The frontend will be available at `http://localhost:4200`.
 
+### Kubernetes Deployment (Helm & Istio)
+
+For production-like environments, you can deploy the entire stack using Helm on a Kubernetes cluster with Istio.
+
+1.  **Navigate to the `k8s` directory:**
+    ```bash
+    cd k8s
+    ```
+2.  **Follow the instructions in [k8s/README.md](./k8s/README.md)** to build images and deploy the Helm chart.
+
+The Helm chart includes:
+- Backend & Frontend deployments.
+- Managed PostgreSQL, Elasticsearch, and Redis (Bitnami-based/compatible).
+- Istio Gateway and VirtualService for traffic management.
+
 ### Local Development
 
 #### Backend
@@ -77,6 +92,7 @@ The project includes an observability stack (Grafana LGTM) integrated into the m
 ```
 .
 ├── data/               # Data snapshots and SQL migration scripts
+├── k8s/                # Kubernetes manifests and Helm charts
 ├── msvc/               # Spring Boot backend application
 ├── observability/      # Observability configuration (OpenTelemetry)
 └── ui/                 # Angular frontend application
